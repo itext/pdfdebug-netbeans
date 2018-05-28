@@ -113,16 +113,7 @@ public final class RUPSTopComponent extends TopComponent {
 
     @Override
     public void componentClosed() {
-        try {
-            rups.clearHighlights();
-            rups.closeDocument();
-            if (prevDoc != null) {
-                prevDoc.close();
-                prevDoc = null;
-            }
-        } catch (Exception any) {
-            LoggerHelper.error("Closing error.", any, getClass());
-        }
+
     }
 
     void writeProperties(java.util.Properties p) {
@@ -170,13 +161,24 @@ public final class RUPSTopComponent extends TopComponent {
         }
     }
 
-    void setDocumentRawBytes(byte[] rawBytes
-    ) {
+    void setDocumentRawBytes(byte[] rawBytes) {
         documentRawBytes = rawBytes;
     }
 
-    void setVariableName(String name
-    ) {
+    void setVariableName(String name) {
         variableName = name;
+    }
+
+    public void disposePdfWindow() {
+        try {
+            rups.clearHighlights();
+            rups.closeDocument();
+            if (prevDoc != null) {
+                prevDoc.close();
+                prevDoc = null;
+            }
+        } catch (Exception any) {
+            LoggerHelper.error("Closing error.", any, getClass());
+        }
     }
 }
