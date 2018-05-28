@@ -34,7 +34,6 @@ public class DebugListener implements DebuggerManagerListener {
     private final LookupListener listener = new LookupListener() {
         @Override
         public void resultChanged(LookupEvent le) {
-            System.out.println("Result Changed");
             Lookup.Result res = (Lookup.Result) le.getSource();
             List<? extends Object> list = (List) res.allInstances();
             Object obj = list.get(0);

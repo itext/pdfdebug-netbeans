@@ -99,7 +99,6 @@ public final class RUPSTopComponent extends TopComponent {
     public void initRups() {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                System.out.println("invokeSync.run");
                 jPanel1.setLayout(new BorderLayout());
                 final Dimension dim = new Dimension(400, 300);
                 rups = Rups.startNewPlugin(jPanel1, dim, null);
@@ -139,7 +138,6 @@ public final class RUPSTopComponent extends TopComponent {
     }
 
     public void draw() {
-        System.out.println("draw");
         ByteArrayInputStream bais = null;
         try {
             if (documentRawBytes != null) {
