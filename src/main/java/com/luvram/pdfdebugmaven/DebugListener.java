@@ -46,6 +46,8 @@ public class DebugListener implements DebuggerManagerListener {
                 } else {
                     hideRups();
                 }
+            } else {
+                hideRups();
             }
 
         }
@@ -97,8 +99,10 @@ public class DebugListener implements DebuggerManagerListener {
             @Override
             public void run() {
                 RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent("RUPSTopComponent");
-                rupsComponent.close();
-                rupsComponent.disposePdfWindow();
+                if (rupsComponent != null) {
+                    rupsComponent.close();
+                    rupsComponent.disposePdfWindow();
+                }
 
                 TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
                 Lookup lookup = locals.getLookup();
