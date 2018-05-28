@@ -5,21 +5,10 @@
  */
 package com.luvram.pdfdebugmaven;
 
-import com.itextpdf.kernel.PdfException;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.SwingHelper;
 import com.luvram.pdfdebugmaven.utilities.PdfDocumentUtilities;
-import java.awt.Component;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
-import static java.lang.System.in;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
@@ -32,10 +21,6 @@ import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
-import org.openide.util.Utilities;
-import org.openide.util.lookup.Lookups;
-import org.openide.util.lookup.ProxyLookup;
-import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -44,6 +29,26 @@ import org.openide.windows.WindowManager;
  * @author boram
  */
 public class DebugListener implements DebuggerManagerListener {
+
+    private final LookupListener listener = new LookupListener() {
+        @Override
+        public void resultChanged(LookupEvent le) {
+            System.out.println("Result Changed");
+            Lookup.Result res = (Lookup.Result) le.getSource();
+            List<? extends Object> list = (List) res.allInstances();
+            Object obj = list.get(0);
+            if (obj instanceof ObjectVariable) {
+                boolean isPdfDocument = false;
+                ObjectVariable pdfObj = (ObjectVariable) obj;
+                isPdfDocument = pdfObj.getClassType().isInstanceOf("com.itextpdf.kernel.pdf.PdfDocument");
+                if (isPdfDocument) {
+                    showRups(pdfObj);
+
+                }
+            }
+
+        }
+    };
 
     @Override
     public Breakpoint[] initBreakpoints() {
@@ -73,34 +78,14 @@ public class DebugListener implements DebuggerManagerListener {
 
     @Override
     public void sessionAdded(Session sn) {
-
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
                 Lookup lookup = locals.getLookup();
                 Lookup.Result lookupRs = lookup.lookupResult(Object.class);
-                lookupRs.addLookupListener(new LookupListener() {
-                    @Override
-                    public void resultChanged(LookupEvent le) {
-                        System.out.println("Result Changed");
-                        Lookup.Result res = (Lookup.Result) le.getSource();
-                        List<? extends Object> list = (List) res.allInstances();
-                        Object obj = list.get(0);
-                        if (obj instanceof ObjectVariable) {
-                            boolean isPdfDocument = false;
-                            ObjectVariable pdfObj = (ObjectVariable) obj;
-                            isPdfDocument = pdfObj.getClassType().isInstanceOf("com.itextpdf.kernel.pdf.PdfDocument");
-                            if (isPdfDocument) { 
-                                showRups(pdfObj);
-
-                            }
-                        }
-
-                    }
-                });
+                lookupRs.addLookupListener(listener);
             }
-
         });
 
     }
@@ -112,6 +97,11 @@ public class DebugListener implements DebuggerManagerListener {
             public void run() {
                 RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent("RUPSTopComponent");
                 rupsComponent.close();
+
+                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
+                Lookup lookup = locals.getLookup();
+                Lookup.Result lookupRs = lookup.lookupResult(Object.class);
+                lookupRs.removeLookupListener(listener);
             }
 
         });
@@ -136,16 +126,14 @@ public class DebugListener implements DebuggerManagerListener {
             Runnable runnable = new Runnable() {
                 public void run() {
                     byte[] rawDocument = PdfDocumentUtilities.getDocumentDebugBytes(finalPdfObj);
-                    if(finalPdfObj instanceof LocalVariable) {
+                    if (finalPdfObj instanceof LocalVariable) {
                         rupsComponent.setVariableName(((LocalVariable) finalPdfObj).getName());
-                    } else if( finalPdfObj instanceof Field ) {
+                    } else if (finalPdfObj instanceof Field) {
                         rupsComponent.setVariableName(((Field) finalPdfObj).getName());
                     } else {
                         rupsComponent.setVariableName("");
                     }
-                        
-                        
-                    
+
                     rupsComponent.setDocumentRawBytes(rawDocument);
 
                     SwingUtilities.invokeLater(new Runnable() {

@@ -17,7 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 
@@ -26,12 +25,12 @@ import org.openide.util.NbBundle.Messages;
  */
 @ConvertAsProperties(
         dtd = "-//com.luvram.pdfdebugmaven//RUPS//EN",
-        autostore = true
+        autostore = false
 )
 @TopComponent.Description(
         preferredID = "RUPSTopComponent",
         //iconBase="SET/PATH/TO/ICON/HERE", 
-        persistenceType = TopComponent.PERSISTENCE_ALWAYS
+        persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "navigator", openAtStartup = false)
 @ActionID(category = "Window", id = "com.luvram.pdfdebugmaven.RUPSTopComponent")
@@ -46,19 +45,17 @@ import org.openide.util.NbBundle.Messages;
 })
 public final class RUPSTopComponent extends TopComponent {
 
-    private static volatile Rups rups = null;
+    private volatile Rups rups = null;
 
     private volatile PdfDocument prevDoc = null;
     private byte[] documentRawBytes = null;
     private String variableName = "";
 
     public RUPSTopComponent() {
-        if (RUPSTopComponent.rups == null) {
-            initComponents();
-            setName(Bundle.CTL_RUPSTopComponent());
-            setToolTipText(Bundle.HINT_RUPSTopComponent());
-            initRups();
-        }
+        initComponents();
+        setName(Bundle.CTL_RUPSTopComponent());
+        setToolTipText(Bundle.HINT_RUPSTopComponent());
+        initRups();
 
     }
 
@@ -100,13 +97,12 @@ public final class RUPSTopComponent extends TopComponent {
     // End of variables declaration//GEN-END:variables
 
     public void initRups() {
-        System.out.println("initRups");
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 System.out.println("invokeSync.run");
                 jPanel1.setLayout(new BorderLayout());
                 final Dimension dim = new Dimension(400, 300);
-                RUPSTopComponent.rups = Rups.startNewPlugin(jPanel1, dim, null);
+                rups = Rups.startNewPlugin(jPanel1, dim, null);
             }
         });
     }
@@ -119,12 +115,12 @@ public final class RUPSTopComponent extends TopComponent {
     @Override
     public void componentClosed() {
         try {
-            RUPSTopComponent.rups.closeDocument();
+            rups.clearHighlights();
+            rups.closeDocument();
             if (prevDoc != null) {
                 prevDoc.close();
                 prevDoc = null;
             }
-            RUPSTopComponent.rups = null;
         } catch (Exception any) {
             LoggerHelper.error("Closing error.", any, getClass());
         }
@@ -152,13 +148,13 @@ public final class RUPSTopComponent extends TopComponent {
                 PdfDocument tempDoc = new PdfDocument(reader);
                 boolean isEqual = false;
                 if (prevDoc != null) {
-                    isEqual = RUPSTopComponent.rups.compareWithDocument(tempDoc, true);
+                    isEqual = rups.compareWithDocument(tempDoc, true);
                 }
                 if (!isEqual) {
-                    RUPSTopComponent.rups.loadDocumentFromRawContent(documentRawBytes, variableName, null, true);
+                    rups.loadDocumentFromRawContent(documentRawBytes, variableName, null, true);
                 }
                 if (prevDoc != null && !isEqual) {
-                    RUPSTopComponent.rups.highlightLastSavedChanges();
+                    rups.highlightLastSavedChanges();
                 }
                 prevDoc = tempDoc;
             }
