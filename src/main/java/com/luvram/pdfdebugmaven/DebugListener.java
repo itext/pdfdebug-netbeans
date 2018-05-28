@@ -21,6 +21,7 @@ import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
+import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -85,6 +86,10 @@ public class DebugListener implements DebuggerManagerListener {
                 Lookup lookup = locals.getLookup();
                 Lookup.Result lookupRs = lookup.lookupResult(Object.class);
                 lookupRs.addLookupListener(listener);
+
+                Mode mode = WindowManager.getDefault().findMode("navigator");
+                TopComponent rupsTopComponent = WindowManager.getDefault().findTopComponent("RUPSTopComponent");
+                mode.dockInto(rupsTopComponent);
             }
         });
 
