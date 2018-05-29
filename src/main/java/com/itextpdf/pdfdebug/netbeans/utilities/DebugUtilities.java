@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.luvram.pdfdebugmaven.utilities;
+package com.itextpdf.pdfdebug.netbeans.utilities;
 
 import org.netbeans.api.debugger.jpda.Field;
 import org.netbeans.api.debugger.jpda.LocalVariable;

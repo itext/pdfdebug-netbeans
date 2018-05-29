@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.luvram.pdfdebugmaven;
+package com.itextpdf.pdfdebug.netbeans;
 
 import com.itextpdf.rups.model.LoggerHelper;
-import com.luvram.pdfdebugmaven.utilities.DebugUtilities;
-import com.luvram.pdfdebugmaven.utilities.PdfDocumentUtilities;
+import com.itextpdf.pdfdebug.netbeans.utilities.DebugUtilities;
+import com.itextpdf.pdfdebug.netbeans.utilities.PdfDocumentUtilities;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 import javax.swing.SwingUtilities;

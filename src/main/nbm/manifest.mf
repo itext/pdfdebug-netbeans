@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: true
-OpenIDE-Module: com.luvram.pdfdebugmaven
-OpenIDE-Module-Install: com/luvram/pdfdebugmaven/Installer.class
-OpenIDE-Module-Localizing-Bundle: com/luvram/pdfdebugmaven/Bundle.properties
+OpenIDE-Module: com.itextpdf.pdfdebug.netbeans
+OpenIDE-Module-Install: com/itextpdf/pdfdebug/netbeans/Installer.class
+OpenIDE-Module-Localizing-Bundle: com/itextpdf/pdfdebug/netbeans/Bundle.properties
 OpenIDE-Module-Requires: org.openide.windows.WindowManager
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.luvram.pdfdebugmaven;
+package com.itextpdf.pdfdebug.netbeans;
 
 import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
