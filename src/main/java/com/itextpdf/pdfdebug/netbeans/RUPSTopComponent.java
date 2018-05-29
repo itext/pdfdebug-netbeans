@@ -41,7 +41,7 @@ import org.openide.util.NbBundle.Messages;
 @Messages({
     "CTL_RUPSAction=RUPS",
     "CTL_RUPSTopComponent=PDF Debug",
-    "HINT_RUPSTopComponent=This is a RUPS window"
+    "HINT_RUPSTopComponent=This is a PDF Debug window"
 })
 public final class RUPSTopComponent extends TopComponent {
 
@@ -106,28 +106,6 @@ public final class RUPSTopComponent extends TopComponent {
         });
     }
 
-    @Override
-    public void componentOpened() {
-        // TODO add custom code on component opening
-    }
-
-    @Override
-    public void componentClosed() {
-
-    }
-
-    void writeProperties(java.util.Properties p) {
-        // better to version settings since initial version as advocated at
-        // http://wiki.apidesign.org/wiki/PropertyFiles
-        p.setProperty("version", "1.0");
-        // TODO store your settings
-    }
-
-    void readProperties(java.util.Properties p) {
-        String version = p.getProperty("version");
-        // TODO read your settings according to their version
-    }
-
     public void showPdfWindow() {
         ByteArrayInputStream bais = null;
         try {
@@ -161,14 +139,6 @@ public final class RUPSTopComponent extends TopComponent {
         }
     }
 
-    void setDocumentRawBytes(byte[] rawBytes) {
-        documentRawBytes = rawBytes;
-    }
-
-    void setVariableName(String name) {
-        variableName = name;
-    }
-
     public void disposePdfWindow() {
         try {
             rups.clearHighlights();
@@ -180,5 +150,35 @@ public final class RUPSTopComponent extends TopComponent {
         } catch (Exception any) {
             LoggerHelper.error("Closing error.", any, getClass());
         }
+    }
+    
+    void setDocumentRawBytes(byte[] rawBytes) {
+        documentRawBytes = rawBytes;
+    }
+
+    void setVariableName(String name) {
+        variableName = name;
+    }
+    
+    @Override
+    public void componentOpened() {
+        // TODO add custom code on component opening
+    }
+
+    @Override
+    public void componentClosed() {
+
+    }
+
+    void writeProperties(java.util.Properties p) {
+        // better to version settings since initial version as advocated at
+        // http://wiki.apidesign.org/wiki/PropertyFiles
+        p.setProperty("version", "1.0");
+        // TODO store your settings
+    }
+
+    void readProperties(java.util.Properties p) {
+        String version = p.getProperty("version");
+        // TODO read your settings according to their version
     }
 }
