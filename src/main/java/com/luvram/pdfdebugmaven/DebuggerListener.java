@@ -6,6 +6,7 @@
 package com.luvram.pdfdebugmaven;
 
 import com.itextpdf.rups.model.LoggerHelper;
+import com.luvram.pdfdebugmaven.utilities.DebugUtilities;
 import com.luvram.pdfdebugmaven.utilities.PdfDocumentUtilities;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
@@ -15,8 +16,6 @@ import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManagerListener;
 import org.netbeans.api.debugger.Session;
 import org.netbeans.api.debugger.Watch;
-import org.netbeans.api.debugger.jpda.Field;
-import org.netbeans.api.debugger.jpda.LocalVariable;
 import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
@@ -29,7 +28,10 @@ import org.openide.windows.WindowManager;
  *
  * @author boram
  */
-public class DebugListener implements DebuggerManagerListener {
+public class DebuggerListener implements DebuggerManagerListener {
+
+    private static final String COMPONENT_NAME = "RUPSTopComponent";
+    private static final String MODE = "navigator";
 
     private final LookupListener listener = new LookupListener() {
         @Override
@@ -38,10 +40,8 @@ public class DebugListener implements DebuggerManagerListener {
             List<? extends Object> list = (List) res.allInstances();
             Object obj = list.get(0);
             if (obj instanceof ObjectVariable) {
-                boolean isPdfDocument = false;
                 ObjectVariable pdfObj = (ObjectVariable) obj;
-                isPdfDocument = pdfObj.getClassType().isInstanceOf("com.itextpdf.kernel.pdf.PdfDocument");
-                if (isPdfDocument) {
+                if (PdfDocumentUtilities.isPdfDocument(pdfObj)) {
                     showRups(pdfObj);
                 } else {
                     hideRups();
@@ -49,9 +49,84 @@ public class DebugListener implements DebuggerManagerListener {
             } else {
                 hideRups();
             }
-
         }
     };
+
+    @Override
+    public void sessionAdded(Session sn) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
+                Lookup lookup = locals.getLookup();
+                Lookup.Result lookupRs = lookup.lookupResult(Object.class);
+                lookupRs.addLookupListener(listener);
+            }
+        });
+
+    }
+
+    @Override
+    public void sessionRemoved(Session sn) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
+                if (rupsComponent != null) {
+                    rupsComponent.close();
+                    rupsComponent.disposePdfWindow();
+                }
+
+                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
+                Lookup lookup = locals.getLookup();
+                Lookup.Result lookupRs = lookup.lookupResult(Object.class);
+                lookupRs.removeLookupListener(listener);
+            }
+
+        });
+    }
+
+    public void showRups(final ObjectVariable finalPdfObj) {
+        try {
+
+            Runnable openComponent = new Runnable() {
+                public void run() {
+                    TopComponent rupsComponent = WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
+                    if (!rupsComponent.isOpened()) {
+                        Mode mode = WindowManager.getDefault().findMode(MODE);
+                        mode.dockInto(rupsComponent);
+                        rupsComponent.open();
+                        rupsComponent.requestActive();
+                    }
+                }
+            };
+            final RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
+            Runnable loadPdfDocument = new Runnable() {
+                public void run() {
+                    byte[] rawDocument = PdfDocumentUtilities.getDocumentDebugBytes(finalPdfObj);
+                    rupsComponent.setDocumentRawBytes(rawDocument);
+                    rupsComponent.setVariableName(DebugUtilities.getVariableName(finalPdfObj));
+                    SwingUtilities.invokeLater(openComponent);
+
+                    rupsComponent.showPdfWindow();
+                }
+            };
+            Thread t = new Thread(loadPdfDocument);
+            t.start();
+        } catch (Exception e) {
+            LoggerHelper.error("Error is accured during read bytes", e, getClass());
+        }
+
+    }
+
+    public void hideRups() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
+                rupsComponent.close();
+            }
+        });
+    }
 
     @Override
     public Breakpoint[] initBreakpoints() {
@@ -80,40 +155,6 @@ public class DebugListener implements DebuggerManagerListener {
     }
 
     @Override
-    public void sessionAdded(Session sn) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
-                Lookup lookup = locals.getLookup();
-                Lookup.Result lookupRs = lookup.lookupResult(Object.class);
-                lookupRs.addLookupListener(listener);
-            }
-        });
-
-    }
-
-    @Override
-    public void sessionRemoved(Session sn) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent("RUPSTopComponent");
-                if (rupsComponent != null) {
-                    rupsComponent.close();
-                    rupsComponent.disposePdfWindow();
-                }
-
-                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
-                Lookup lookup = locals.getLookup();
-                Lookup.Result lookupRs = lookup.lookupResult(Object.class);
-                lookupRs.removeLookupListener(listener);
-            }
-
-        });
-    }
-
-    @Override
     public void engineAdded(DebuggerEngine de) {
 
     }
@@ -124,56 +165,6 @@ public class DebugListener implements DebuggerManagerListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-    }
-
-    public void showRups(final ObjectVariable finalPdfObj) {
-        try {
-            final RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent("RUPSTopComponent");
-            Runnable runnable = new Runnable() {
-                public void run() {
-                    byte[] rawDocument = PdfDocumentUtilities.getDocumentDebugBytes(finalPdfObj);
-                    if (finalPdfObj instanceof LocalVariable) {
-                        rupsComponent.setVariableName(((LocalVariable) finalPdfObj).getName());
-                    } else if (finalPdfObj instanceof Field) {
-                        rupsComponent.setVariableName(((Field) finalPdfObj).getName());
-                    } else {
-                        rupsComponent.setVariableName("");
-                    }
-
-                    rupsComponent.setDocumentRawBytes(rawDocument);
-
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            if (!rupsComponent.isOpened()) {
-                                // todo: 변수명 정리해서 쓸 수 있을것 같기도. 아닌가?
-                                Mode mode = WindowManager.getDefault().findMode("navigator");
-                                TopComponent rupsTopComponent = WindowManager.getDefault().findTopComponent("RUPSTopComponent");
-                                mode.dockInto(rupsTopComponent);
-                                rupsTopComponent.open();
-                                rupsTopComponent.requestActive();
-                            }
-                        }
-                    });
-
-                    rupsComponent.draw();
-                }
-            };
-            Thread t = new Thread(runnable);
-            t.start();
-        } catch (Exception e) {
-            LoggerHelper.error("Error is accured during read bytes", e, getClass());
-        }
-
-    }
-
-    public void hideRups() {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent("RUPSTopComponent");
-                rupsComponent.close();
-            }
-        });
     }
 
 }

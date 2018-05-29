@@ -128,7 +128,7 @@ public final class RUPSTopComponent extends TopComponent {
         // TODO read your settings according to their version
     }
 
-    public void draw() {
+    public void showPdfWindow() {
         ByteArrayInputStream bais = null;
         try {
             if (documentRawBytes != null) {
@@ -142,7 +142,7 @@ public final class RUPSTopComponent extends TopComponent {
                 if (!isEqual) {
                     rups.loadDocumentFromRawContent(documentRawBytes, variableName, null, true);
                 }
-                if (prevDoc != null && !isEqual) {
+                if (prevDoc != null) {
                     rups.highlightLastSavedChanges();
                 }
                 prevDoc = tempDoc;

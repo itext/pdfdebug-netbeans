@@ -14,12 +14,7 @@ import java.lang.reflect.Method;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.SwingHelper;
-import org.netbeans.api.debugger.DebuggerEngine;
-import org.netbeans.api.debugger.DebuggerManager;
 import org.netbeans.api.debugger.jpda.InvalidExpressionException;
-import org.netbeans.api.debugger.jpda.JPDADebugger;
-import org.netbeans.api.debugger.jpda.JPDAThread;
 import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.netbeans.api.debugger.jpda.Variable;
 
@@ -49,28 +44,14 @@ public class PdfDocumentUtilities {
         }
     }
 
-//    /**
-//     * Return whether a given IJavaVariable represents a PdfDocument object
-//     *
-//     * @param var the input variable
-//     * @return true if the input variable is a PdfDocument object, false otherwise
-//     */
-//    public static boolean isPdfDocument(ObjectVariable var) {
-//        try {
-//            ObjectVariable obj = DebugUtilities.getIJavaObject(var);
-//            if (obj != null && obj.getJavaType().getName().equals(CLASS_TYPE)) {
-//                return true;
-//            }
-//        } catch (DebugException ignored) {
-//        }
-//        return false;
-//    }
-    /**
-     * Get the bytes representing the PdfDocument in a given IJavaVariable
-     *
-     * @param var the input variable
-     * @return the bytes representing the PdfDocument
-     */
+    public static boolean isPdfDocument(ObjectVariable var) {
+        if (var != null && var.getClassType().isInstanceOf(CLASS_TYPE)) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static byte[] getDocumentDebugBytes(ObjectVariable var) {
         PdfDocument doc = null;
         doc = getPdfDocument(var);
@@ -100,18 +81,12 @@ public class PdfDocumentUtilities {
         return documentCopyBytes;
     }
 
-    /**
-     * Get the PdfDocument object represented by a given IJavaVariable
-     *
-     * @param var the input variable
-     * @return the PdfDocument object represented by the input variable
-     */
     private static PdfDocument getPdfDocument(ObjectVariable var) {
         byte[] bytes = null;
         try {
             Variable[] arg = {};
             Variable result = var.invokeMethod("getSerializedBytes", "()[B", arg);
-            bytes = (byte[])result.createMirrorObject();
+            bytes = (byte[]) result.createMirrorObject();
         } catch (NoSuchMethodException e) {
             LoggerHelper.error("Getting serialized bytes error", e, PdfDocumentUtilities.class);
         } catch (InvalidExpressionException e) {
@@ -121,34 +96,6 @@ public class PdfDocumentUtilities {
         return createDocumentFromBytes(bytes);
     }
 
-    /**
-     * Get the bytes representing the PdfDocument in a given IJavaValue
-     *
-     * @param byteArr the input value
-     * @return the bytes representing the PdfDocument
-     */
-//    private static byte[] getByteArray(IJavaValue byteArr) {
-//        byte[] res = null;
-//        try {
-//            if (byteArr instanceof IJavaArray) {
-//                IJavaValue[] arr = ((IJavaArray) byteArr).getValues();
-//                res = new byte[arr.length];
-//                if (arr.length != 0 && arr[0] instanceof IJavaPrimitiveValue) {
-//                    for (int i = 0; i < arr.length; ++i) {
-//                        res[i] = ((IJavaPrimitiveValue) arr[i]).getByteValue();
-//                    }
-//                }
-//            }
-//        } catch (DebugException ignored) {
-//        }
-//        return res;
-//    }
-    /**
-     * Creates a PdfDocument from a byte[]
-     *
-     * @param bytes input byte[]
-     * @return a PdfDocument object
-     */
     private static PdfDocument createDocumentFromBytes(byte[] bytes) {
         if (bytes == null) {
             return null;
