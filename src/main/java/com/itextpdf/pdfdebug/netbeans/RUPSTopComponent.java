@@ -48,7 +48,7 @@ public final class RUPSTopComponent extends TopComponent {
     private volatile Rups rups = null;
 
     private volatile PdfDocument prevDoc = null;
-    private byte[] documentRawBytes = null;
+    public byte[] documentRawBytes = null;
     private String variableName = "";
 
     public RUPSTopComponent() {
@@ -151,7 +151,7 @@ public final class RUPSTopComponent extends TopComponent {
             LoggerHelper.error("Closing error.", any, getClass());
         }
     }
-    
+
     void setDocumentRawBytes(byte[] rawBytes) {
         documentRawBytes = rawBytes;
     }
@@ -159,7 +159,7 @@ public final class RUPSTopComponent extends TopComponent {
     void setVariableName(String name) {
         variableName = name;
     }
-    
+
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening

@@ -5,8 +5,6 @@
  */
 package com.itextpdf.pdfdebug.netbeans;
 
-import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.pdfdebug.netbeans.utilities.DebugUtilities;
 import com.itextpdf.pdfdebug.netbeans.utilities.PdfDocumentUtilities;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
@@ -20,7 +18,6 @@ import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
-import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -28,7 +25,7 @@ import org.openide.windows.WindowManager;
  *
  * @author boram
  */
-public class DebuggerListener implements DebuggerManagerListener {
+public class DebuggerVariablesListener implements DebuggerManagerListener {
 
     private static final String COMPONENT_NAME = "RUPSTopComponent";
     private static final String MODE = "navigator";
@@ -38,16 +35,17 @@ public class DebuggerListener implements DebuggerManagerListener {
         public void resultChanged(LookupEvent le) {
             Lookup.Result res = (Lookup.Result) le.getSource();
             List<? extends Object> list = (List) res.allInstances();
+            RUPSController rupsController = new RUPSController();
             Object obj = list.get(0);
             if (obj instanceof ObjectVariable) {
                 ObjectVariable pdfObj = (ObjectVariable) obj;
                 if (PdfDocumentUtilities.isPdfDocument(pdfObj)) {
-                    showRups(pdfObj);
+                    rupsController.showRups(pdfObj);
                 } else {
-                    hideRups();
+                    rupsController.hideRups();
                 }
             } else {
-                hideRups();
+                rupsController.hideRups();
             }
         }
     };
@@ -86,48 +84,6 @@ public class DebuggerListener implements DebuggerManagerListener {
         });
     }
 
-    public void showRups(final ObjectVariable finalPdfObj) {
-        try {
-
-            Runnable openComponent = new Runnable() {
-                public void run() {
-                    TopComponent rupsComponent = WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
-                    if (!rupsComponent.isOpened()) {
-                        Mode mode = WindowManager.getDefault().findMode(MODE);
-                        mode.dockInto(rupsComponent);
-                        rupsComponent.open();
-                        rupsComponent.requestActive();
-                    }
-                }
-            };
-            final RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
-            Runnable loadPdfDocument = new Runnable() {
-                public void run() {
-                    byte[] rawDocument = PdfDocumentUtilities.getDocumentDebugBytes(finalPdfObj);
-                    rupsComponent.setDocumentRawBytes(rawDocument);
-                    rupsComponent.setVariableName(DebugUtilities.getVariableName(finalPdfObj));
-                    SwingUtilities.invokeLater(openComponent);
-
-                    rupsComponent.showPdfWindow();
-                }
-            };
-            Thread t = new Thread(loadPdfDocument);
-            t.start();
-        } catch (Exception e) {
-            LoggerHelper.error("Error is accured during read bytes", e, getClass());
-        }
-
-    }
-
-    public void hideRups() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
-                rupsComponent.close();
-            }
-        });
-    }
-
     @Override
     public Breakpoint[] initBreakpoints() {
         return null;
@@ -156,7 +112,6 @@ public class DebuggerListener implements DebuggerManagerListener {
 
     @Override
     public void engineAdded(DebuggerEngine de) {
-
     }
 
     @Override
