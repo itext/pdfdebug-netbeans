@@ -33,7 +33,7 @@ import org.openide.util.NbBundle.Messages;
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "navigator", openAtStartup = false)
-@ActionID(category = "Window", id = "com.luvram.pdfdebugmaven.RUPSTopComponent")
+@ActionID(category = "Window", id = "com.itextpdf.pdfdebug.netbeans.RUPSTopComponent")
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_RUPSAction",
         preferredID = "RUPSTopComponent"
