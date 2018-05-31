@@ -6,11 +6,10 @@
 package com.itextpdf.pdfdebug.netbeans;
 
 import com.itextpdf.pdfdebug.netbeans.utilities.PdfDocumentUtilities;
-import java.util.List;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.debugger.ActionsManagerListener;
 import org.netbeans.api.debugger.jpda.ObjectVariable;
-import org.openide.util.Lookup;
+import org.openide.nodes.Node;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -26,26 +25,25 @@ public class DebuggerActionListener implements ActionsManagerListener {
 
     @Override
     public void actionStateChanged(Object o, boolean bln) {
-//        System.out.println(o + " - " + bln);
+        System.out.println(o + " - " + bln);
         if ("pause".equals(o) && bln) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
                     TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
-                    Lookup lookup = locals.getLookup();
-                    Lookup.Result lookupRs = lookup.lookupResult(Object.class);
-                    List<? extends Object> list = (List) lookupRs.allInstances();
-                    RUPSController rupsController = new RUPSController();
-                    Object obj = list.get(0);
-                    if (obj instanceof ObjectVariable) {
-                        ObjectVariable pdfObj = (ObjectVariable) obj;
-                        if (PdfDocumentUtilities.isPdfDocument(pdfObj)) {
-                            rupsController.showRups(pdfObj);
+                    Node[] activatedNodes = locals.getActivatedNodes();
+                    if (activatedNodes != null && activatedNodes.length == 1) {
+                        ObjectVariable obj = activatedNodes[0].getLookup().lookup(ObjectVariable.class);
+                        if (obj != null) {
+                            ObjectVariable pdfObj = (ObjectVariable) obj;
+                            if (PdfDocumentUtilities.isPdfDocument(pdfObj)) {
+                                RUPSController.showRups(pdfObj);
+                            } else {
+                                RUPSController.hideRups();
+                            }
                         } else {
-                            rupsController.hideRups();
+                            RUPSController.hideRups();
                         }
-                    } else {
-                        rupsController.hideRups();
                     }
 
                 }
