@@ -9,6 +9,7 @@ import com.itextpdf.pdfdebug.netbeans.utilities.PdfDocumentUtilities;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 import javax.swing.SwingUtilities;
+import org.netbeans.api.debugger.ActionsManager;
 import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManagerListener;
@@ -25,6 +26,7 @@ import org.openide.windows.WindowManager;
  *
  * @author boram
  */
+// todo 이름변경하기
 public class DebuggerVariablesListener implements DebuggerManagerListener {
 
     private static final String COMPONENT_NAME = "RUPSTopComponent";
@@ -112,6 +114,8 @@ public class DebuggerVariablesListener implements DebuggerManagerListener {
 
     @Override
     public void engineAdded(DebuggerEngine de) {
+        ActionsManager am = de.getActionsManager ();
+        am.addActionsManagerListener(new DebuggerActionListener());
     }
 
     @Override

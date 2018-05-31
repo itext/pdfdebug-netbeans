@@ -26,7 +26,8 @@ public class DebuggerActionListener implements ActionsManagerListener {
 
     @Override
     public void actionStateChanged(Object o, boolean bln) {
-        if ("toggleBreakpoint".equals(o) && bln) {
+//        System.out.println(o + " - " + bln);
+        if ("pause".equals(o) && bln) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {

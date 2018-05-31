@@ -5,19 +5,41 @@
  */
 package com.itextpdf.pdfdebug.netbeans;
 
+import java.util.List;
 import org.netbeans.api.debugger.ActionsManager;
 import org.netbeans.api.debugger.DebuggerManager;
+//import org.netbeans.modules.debugger.jpda.actions.StepIntoActionProvider;
+import org.netbeans.spi.debugger.ActionsProvider;
+import org.netbeans.spi.debugger.ActionsProviderListener;
 import org.openide.modules.ModuleInstall;
 
 public class Installer extends ModuleInstall {
+
+    private final ActionsProviderListener actionsProviderListener  = new ActionsProviderListener() {
+        @Override
+        public void actionStateChange(Object action, boolean enabled) {
+            System.out.println(action + " = " + enabled);
+        }
+    };
 
     @Override
     public void restored() {
         DebuggerManager dm = DebuggerManager.getDebuggerManager();
         dm.addDebuggerListener(new DebuggerVariablesListener());
-        
-        ActionsManager am = dm.getActionsManager();
-        am.addActionsManagerListener(new DebuggerActionListener());
+
+//        ActionsManager am = dm.getActionsManager();
+//        am.addActionsManagerListener(new DebuggerActionListener());
+
+//        List providers = DebuggerManager.getDebuggerManager().lookup("", ActionsProvider.class);
+//        for (Object item : providers) {
+//            ((ActionsProvider) item).addActionsProviderListener(actionsProviderListener);
+//            if( ((ActionsProvider) item).toString().contains("StepActionProvider")) {
+//                
+//            }
+//            System.out.println(item);
+//        }
+//        ((ActionsProvider)providers.get(0)).addActionsProviderListener();
+
     }
 
 }
