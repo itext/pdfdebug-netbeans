@@ -24,7 +24,7 @@ import org.openide.util.NbBundle.Messages;
  * Top component which displays something.
  */
 @ConvertAsProperties(
-        dtd = "-//com.luvram.pdfdebugmaven//RUPS//EN",
+        dtd = "-//com.itextpdf.pdfdebug.netbeans//RUPS//EN",
         autostore = false
 )
 @TopComponent.Description(

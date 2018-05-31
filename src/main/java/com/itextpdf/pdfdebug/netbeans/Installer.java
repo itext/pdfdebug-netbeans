@@ -26,20 +26,6 @@ public class Installer extends ModuleInstall {
     public void restored() {
         DebuggerManager dm = DebuggerManager.getDebuggerManager();
         dm.addDebuggerListener(new DebuggerVariablesListener());
-
-//        ActionsManager am = dm.getActionsManager();
-//        am.addActionsManagerListener(new DebuggerActionListener());
-
-//        List providers = DebuggerManager.getDebuggerManager().lookup("", ActionsProvider.class);
-//        for (Object item : providers) {
-//            ((ActionsProvider) item).addActionsProviderListener(actionsProviderListener);
-//            if( ((ActionsProvider) item).toString().contains("StepActionProvider")) {
-//                
-//            }
-//            System.out.println(item);
-//        }
-//        ((ActionsProvider)providers.get(0)).addActionsProviderListener();
-
     }
 
 }
