@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.itextpdf.pdfdebug.netbeans;
 
 import com.itextpdf.kernel.PdfException;
@@ -21,7 +16,7 @@ import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 
 /**
- * Top component which displays something.
+ * Top component which displays RUPS
  */
 @ConvertAsProperties(
         dtd = "-//com.itextpdf.pdfdebug.netbeans//RUPS//EN",
@@ -106,7 +101,7 @@ public final class RUPSTopComponent extends TopComponent {
         });
     }
 
-    public void showPdfWindow() {
+    public void loadAndHighlightRups() {
         ByteArrayInputStream bais = null;
         try {
             if (documentRawBytes != null) {
@@ -158,16 +153,6 @@ public final class RUPSTopComponent extends TopComponent {
 
     void setVariableName(String name) {
         variableName = name;
-    }
-
-    @Override
-    public void componentOpened() {
-        // TODO add custom code on component opening
-    }
-
-    @Override
-    public void componentClosed() {
-
     }
 
     void writeProperties(java.util.Properties p) {

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.itextpdf.pdfdebug.netbeans;
 
 import com.itextpdf.pdfdebug.netbeans.utilities.DebugUtilities;
@@ -18,10 +13,10 @@ import org.openide.windows.WindowManager;
  *
  * @author boram
  */
-public class RUPSController {
+class RUPSController {
 
     private static final String COMPONENT_NAME = "RUPSTopComponent";
-    private static final String MODE = "navigator";
+    private static final String MODE_NAVIGATOR = "navigator";
 
     public static void showRups(final ObjectVariable finalPdfObj) {
         try {
@@ -30,7 +25,7 @@ public class RUPSController {
                 public void run() {
                     TopComponent rupsComponent = WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
                     if (!rupsComponent.isOpened()) {
-                        Mode mode = WindowManager.getDefault().findMode(MODE);
+                        Mode mode = WindowManager.getDefault().findMode(MODE_NAVIGATOR);
                         mode.dockInto(rupsComponent);
                         rupsComponent.open();
                         rupsComponent.requestActive();
@@ -43,11 +38,12 @@ public class RUPSController {
                     byte[] rawDocument = PdfDocumentUtilities.getDocumentDebugBytes(finalPdfObj);
                     rupsComponent.setDocumentRawBytes(rawDocument);
                     rupsComponent.setVariableName(DebugUtilities.getVariableName(finalPdfObj));
+                    rupsComponent.loadAndHighlightRups();
+
                     SwingUtilities.invokeLater(openComponent);
-                    rupsComponent.showPdfWindow();
                 }
             };
-            Thread t = new Thread(loadPdfDocument);
+            Thread t = new Thread(loadPdfDocument, "PDF loader");
             t.start();
 
         } catch (Exception e) {
