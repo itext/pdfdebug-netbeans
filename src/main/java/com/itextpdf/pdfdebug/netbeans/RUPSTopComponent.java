@@ -24,7 +24,7 @@ import org.openide.util.NbBundle.Messages;
 )
 @TopComponent.Description(
         preferredID = "RUPSTopComponent",
-        //iconBase="SET/PATH/TO/ICON/HERE", 
+        iconBase="com/itextpdf/pdfdebug/netbeans/pdfdebug.png", 
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "navigator", openAtStartup = false)
