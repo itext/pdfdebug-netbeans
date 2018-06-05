@@ -1,6 +1,13 @@
 # pdfdebug-netbeans
 iText pdfDebug for Netbeans
 
+# available version
+8.1 or higher
+
+Here's my tested results.
+
+[https://docs.google.com/spreadsheets/d/1RFdA9HSstw0Qg5K_hJm0pSzCCQsXaJI3Z6gx0E3qFTU/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1RFdA9HSstw0Qg5K_hJm0pSzCCQsXaJI3Z6gx0E3qFTU/edit?usp=sharing)
+
 # build
 ```
 mvn install
