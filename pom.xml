@@ -14,7 +14,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <useOSGiDependencies>false</useOSGiDependencies>
-                    <licenseFile>src/main/resources/LICENSE.TXT</licenseFile>
+                     <author>iText</author>
+                    <licenseName>Commercial</licenseName>
+                    <licenseFile>src/main/resources/LICENSE.txt</licenseFile>
                 </configuration>
             </plugin>
             <plugin>
