@@ -22,6 +22,7 @@ import org.openide.windows.WindowManager;
 class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
     private static final String COMPONENT_NAME = "RUPSTopComponent";
+    private static final String VARIABLES_TAB_NAME = "localsView";
     private boolean preventUpdate = false;
 
     /**
@@ -36,11 +37,12 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
                 ObjectVariable pdfObj = list.get(0);
                 if (PdfDocumentUtilities.isPdfDocument(pdfObj)) {
                     RUPSController.showRups(pdfObj);
-                } else {
+                } else if(!preventUpdate){
                     RUPSController.hideRups();
                 }
+            } else if(!preventUpdate){
+                RUPSController.hideRups();
             }
-           // else if (!forcePreventUpdate) {
             preventUpdate = false;
 
         }
@@ -56,7 +58,7 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
+                            TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
                             Node[] activatedNodes = locals.getActivatedNodes();
                             if (activatedNodes != null && activatedNodes.length == 1) {
                                 ObjectVariable obj = activatedNodes[0].getLookup().lookup(ObjectVariable.class);
@@ -102,7 +104,7 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
+                TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
                 Lookup lookup = locals.getLookup();
                 Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
                 lookupRs.addLookupListener(variablesSelectListener);
@@ -125,7 +127,7 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
                 TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
                 Lookup lookup = locals.getLookup();
-                Lookup.Result lookupRs = lookup.lookupResult(Object.class);
+                Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
                 lookupRs.removeLookupListener(variablesSelectListener);
             }
 
