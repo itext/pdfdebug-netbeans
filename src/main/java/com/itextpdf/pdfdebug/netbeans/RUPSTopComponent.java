@@ -134,7 +134,7 @@ public final class RUPSTopComponent extends TopComponent {
     // End of variables declaration//GEN-END:variables
 
     public void initRups() {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 jPanel1.setLayout(new BorderLayout());
                 final Dimension dim = new Dimension(400, 400);
