@@ -46,12 +46,15 @@ import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.rups.Rups;
+import com.itextpdf.rups.event.backgroundTask.BackgroundTaskEvent;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.SwingHelper;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.windows.TopComponent;
@@ -66,7 +69,7 @@ import org.openide.util.NbBundle.Messages;
 )
 @TopComponent.Description(
         preferredID = "RUPSTopComponent",
-        iconBase="com/itextpdf/pdfdebug/netbeans/pdfdebug.png", 
+        iconBase = "com/itextpdf/pdfdebug/netbeans/pdfdebug.png",
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "navigator", openAtStartup = false)
@@ -87,6 +90,20 @@ public final class RUPSTopComponent extends TopComponent {
     private volatile PdfDocument prevDoc = null;
     public byte[] documentRawBytes = null;
     private String variableName = "";
+    private final Observer observeBackgroundTask = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            if (arg instanceof BackgroundTaskEvent) {
+                BackgroundTaskEvent event = (BackgroundTaskEvent) arg;
+                if (event.getType() == BackgroundTaskEvent.FINISHED) {
+                    System.out.println("change");
+                    rups.highlightLastSavedChanges();
+                    rups.unregisterEventObserver(this);
+                }
+            }
+
+        }
+    };
 
     public RUPSTopComponent() {
         initComponents();
@@ -155,11 +172,14 @@ public final class RUPSTopComponent extends TopComponent {
                     isEqual = rups.compareWithDocument(tempDoc, true);
                 }
                 if (!isEqual) {
+                    if (prevDoc != null) {
+                        rups.registerEventObserver(observeBackgroundTask);
+                    }
                     rups.loadDocumentFromRawContent(documentRawBytes, variableName, null, true);
-                }
-                if (prevDoc != null) {
+                } else if (prevDoc != null) {
                     rups.highlightLastSavedChanges();
                 }
+
                 prevDoc = tempDoc;
             }
         } catch (final IOException | PdfException | com.itextpdf.io.IOException e) {
