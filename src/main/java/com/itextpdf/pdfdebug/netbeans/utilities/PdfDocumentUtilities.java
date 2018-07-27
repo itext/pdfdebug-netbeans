@@ -1,9 +1,46 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ *  This file is part of the iText (R) project.
+    Copyright (c) 2007-2018 iText Group NV
+ * Authors: Bruno Lowagie et al.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License version 3
+ * as published by the Free Software Foundation with the addition of the
+ * following permission added to Section 15 as permitted in Section 7(a):
+ * FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
+ * ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+ * OF THIRD PARTY RIGHTS
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, see http://www.gnu.org/licenses or write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA, 02110-1301 USA, or download the license from the following URL:
+ * http://itextpdf.com/terms-of-use/
+ *
+ * The interactive user interfaces in modified source and object code versions
+ * of this program must display Appropriate Legal Notices, as required under
+ * Section 5 of the GNU Affero General Public License.
+ *
+ * In accordance with Section 7(b) of the GNU Affero General Public License,
+ * a covered work must retain the producer line in every PDF that is created
+ * or manipulated using iText.
+ *
+ * You can be released from the requirements of the license by purchasing
+ * a commercial license. Buying such a license is mandatory as soon as you
+ * develop commercial activities involving the iText software without
+ * disclosing the source code of your own applications.
+ * These activities include: offering paid services to customers as an ASP,
+ * serving PDFs on the fly in a web application, shipping iText with a closed
+ * source product.
+ *
+ * For more information, please contact iText Software Corp. at this
+ * address: sales@itextpdf.com
  */
-package com.luvram.pdfdebugmaven.utilities;
+package com.itextpdf.pdfdebug.netbeans.utilities;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -14,12 +51,7 @@ import java.lang.reflect.Method;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.SwingHelper;
-import org.netbeans.api.debugger.DebuggerEngine;
-import org.netbeans.api.debugger.DebuggerManager;
 import org.netbeans.api.debugger.jpda.InvalidExpressionException;
-import org.netbeans.api.debugger.jpda.JPDADebugger;
-import org.netbeans.api.debugger.jpda.JPDAThread;
 import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.netbeans.api.debugger.jpda.Variable;
 
@@ -49,28 +81,14 @@ public class PdfDocumentUtilities {
         }
     }
 
-//    /**
-//     * Return whether a given IJavaVariable represents a PdfDocument object
-//     *
-//     * @param var the input variable
-//     * @return true if the input variable is a PdfDocument object, false otherwise
-//     */
-//    public static boolean isPdfDocument(ObjectVariable var) {
-//        try {
-//            ObjectVariable obj = DebugUtilities.getIJavaObject(var);
-//            if (obj != null && obj.getJavaType().getName().equals(CLASS_TYPE)) {
-//                return true;
-//            }
-//        } catch (DebugException ignored) {
-//        }
-//        return false;
-//    }
-    /**
-     * Get the bytes representing the PdfDocument in a given IJavaVariable
-     *
-     * @param var the input variable
-     * @return the bytes representing the PdfDocument
-     */
+    public static boolean isPdfDocument(ObjectVariable var) {
+        if (var != null && var.getClassType().isInstanceOf(CLASS_TYPE)) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static byte[] getDocumentDebugBytes(ObjectVariable var) {
         PdfDocument doc = null;
         doc = getPdfDocument(var);
@@ -100,18 +118,12 @@ public class PdfDocumentUtilities {
         return documentCopyBytes;
     }
 
-    /**
-     * Get the PdfDocument object represented by a given IJavaVariable
-     *
-     * @param var the input variable
-     * @return the PdfDocument object represented by the input variable
-     */
     private static PdfDocument getPdfDocument(ObjectVariable var) {
         byte[] bytes = null;
         try {
             Variable[] arg = {};
             Variable result = var.invokeMethod("getSerializedBytes", "()[B", arg);
-            bytes = (byte[])result.createMirrorObject();
+            bytes = (byte[]) result.createMirrorObject();
         } catch (NoSuchMethodException e) {
             LoggerHelper.error("Getting serialized bytes error", e, PdfDocumentUtilities.class);
         } catch (InvalidExpressionException e) {
@@ -121,34 +133,6 @@ public class PdfDocumentUtilities {
         return createDocumentFromBytes(bytes);
     }
 
-    /**
-     * Get the bytes representing the PdfDocument in a given IJavaValue
-     *
-     * @param byteArr the input value
-     * @return the bytes representing the PdfDocument
-     */
-//    private static byte[] getByteArray(IJavaValue byteArr) {
-//        byte[] res = null;
-//        try {
-//            if (byteArr instanceof IJavaArray) {
-//                IJavaValue[] arr = ((IJavaArray) byteArr).getValues();
-//                res = new byte[arr.length];
-//                if (arr.length != 0 && arr[0] instanceof IJavaPrimitiveValue) {
-//                    for (int i = 0; i < arr.length; ++i) {
-//                        res[i] = ((IJavaPrimitiveValue) arr[i]).getByteValue();
-//                    }
-//                }
-//            }
-//        } catch (DebugException ignored) {
-//        }
-//        return res;
-//    }
-    /**
-     * Creates a PdfDocument from a byte[]
-     *
-     * @param bytes input byte[]
-     * @return a PdfDocument object
-     */
     private static PdfDocument createDocumentFromBytes(byte[] bytes) {
         if (bytes == null) {
             return null;
