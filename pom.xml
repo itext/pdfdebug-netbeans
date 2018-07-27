@@ -19,8 +19,8 @@
         <configuration>
           <useOSGiDependencies>false</useOSGiDependencies>
           <author>iText</author>
-          <licenseName>Commercial</licenseName>
-          <licenseFile>src/main/resources/LICENSE.txt</licenseFile>
+          <licenseName>AGPLv3</licenseName>
+          <licenseFile>src/main/resources/LICENSE.TXT</licenseFile>
         </configuration>
       </plugin>
       <plugin>
