@@ -46,7 +46,8 @@ import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.rups.Rups;
-import com.itextpdf.rups.event.backgroundTask.BackgroundTaskEvent;
+import com.itextpdf.rups.event.RupsEvent;
+
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.SwingHelper;
 import java.awt.BorderLayout;
@@ -55,6 +56,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.windows.TopComponent;
@@ -90,18 +92,23 @@ public final class RUPSTopComponent extends TopComponent {
     private volatile PdfDocument prevDoc = null;
     public byte[] documentRawBytes = null;
     private String variableName = "";
-    private final Observer observeBackgroundTask = new Observer() {
+    private final Observer observeRupsEvent = new Observer() {
         @Override
-        public void update(Observable o, Object arg) {
-            if (arg instanceof BackgroundTaskEvent) {
-                BackgroundTaskEvent event = (BackgroundTaskEvent) arg;
-                if (event.getType() == BackgroundTaskEvent.FINISHED) {
-                    System.out.println("change");
-                    rups.highlightLastSavedChanges();
-                    rups.unregisterEventObserver(this);
+        public void update(Observable o, final Object arg) {
+            if (arg instanceof RupsEvent) {
+                RupsEvent event = (RupsEvent) arg;
+                if (event.getType() == RupsEvent.OPEN_DOCUMENT_POST_EVENT) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            rups.highlightLastSavedChanges();
+                            rups.unregisterEventObserver(observeRupsEvent);
+                        }
+
+                    });
+                    
                 }
             }
-
         }
     };
 
@@ -173,7 +180,7 @@ public final class RUPSTopComponent extends TopComponent {
                 }
                 if (!isEqual) {
                     if (prevDoc != null) {
-                        rups.registerEventObserver(observeBackgroundTask);
+                        rups.registerEventObserver(observeRupsEvent);
                     }
                     rups.loadDocumentFromRawContent(documentRawBytes, variableName, null, true);
                 } else if (prevDoc != null) {
