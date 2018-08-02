@@ -24,4 +24,4 @@ find the .nbm in `./target`
 # show pdfDebug window
 click on a `PdfDocument` instance to invoke PDF Debug window.
 
-![pdfWindow](https://lh6.googleusercontent.com/o_qefg6j5sAmmkpuG7VtCHRtCQZkre-1-m8ez4ysenXmBNyF5OpGR61lZXFMB5Ci65_7mAuNUPeFlMhKf7f-=w4096-h2064-rw)
+![pdfWindow](https://lh3.google.com/u/0/d/1Pnr8FRYWyCUHaN7jTazJ_cOUU8x8Y0yN=w4096-h2064-iv1)
