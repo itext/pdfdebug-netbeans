@@ -82,7 +82,7 @@ public class PdfDocumentUtilities {
     }
 
     public static boolean isPdfDocument(ObjectVariable var) {
-        if (var != null && var.getClassType().isInstanceOf(CLASS_TYPE)) {
+        if (var != null && var.getClassType() != null && var.getClassType().isInstanceOf(CLASS_TYPE)) {
             return true;
         }
 

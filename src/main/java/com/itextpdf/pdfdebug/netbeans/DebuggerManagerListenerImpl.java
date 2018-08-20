@@ -79,16 +79,20 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
                 ObjectVariable pdfObj = list.get(0);
                 if (PdfDocumentUtilities.isPdfDocument(pdfObj)) {
                     RUPSController.showRups(pdfObj);
-                } else if(!preventUpdate){
+                } else if (!preventUpdate) {
                     RUPSController.hideRups();
                 }
-            } else if(!preventUpdate){
+            } else if (!preventUpdate) {
                 RUPSController.hideRups();
             }
             preventUpdate = false;
 
         }
     };
+
+    // There is difference between Netbeans for Windows and Netbeans for Mac for calling order `sessionAdded` and `initWatches`.
+    private Boolean isFirstCalledSessionAdded = false;
+    private Boolean isFirstCalledInitWatches = false;
 
     private final PropertyChangeListener debuggerListener = new PropertyChangeListener() {
         @Override
@@ -143,38 +147,19 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
     @Override
     public void sessionAdded(Session sn) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
-                Lookup lookup = locals.getLookup();
-                Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
-                lookupRs.addLookupListener(variablesSelectListener);
-            }
-        });
+        if (isFirstCalledInitWatches) {
+            registerVariablesTabListener();
+        } else {
+            isFirstCalledSessionAdded = true;
+        }
 
     }
 
     @Override
     public void sessionRemoved(Session sn) {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
-                if (rupsComponent != null) {
-                    rupsComponent.close();
-                    rupsComponent.disposePdfWindow();
-                }
-
-                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
-                Lookup lookup = locals.getLookup();
-                Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
-                lookupRs.removeLookupListener(variablesSelectListener);
-            }
-
-        });
-
+        if (!isFirstCalledSessionAdded) {
+            removeVariablesTabListener();
+        }
     }
 
     @Override
@@ -192,6 +177,11 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
     @Override
     public void initWatches() {
+        if (isFirstCalledSessionAdded) {
+            registerVariablesTabListener();
+        } else {
+            isFirstCalledInitWatches = true;
+        }
 
     }
 
@@ -201,10 +191,44 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
     @Override
     public void watchRemoved(Watch watch) {
+        if (!isFirstCalledInitWatches) {
+            removeVariablesTabListener();
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+    }
+
+    private void registerVariablesTabListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
+                Lookup lookup = locals.getLookup();
+                Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
+                lookupRs.addLookupListener(variablesSelectListener);
+            }
+        });
+    }
+
+    private void removeVariablesTabListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
+                if (rupsComponent != null) {
+                    rupsComponent.close();
+                    rupsComponent.disposePdfWindow();
+                }
+
+                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
+                Lookup lookup = locals.getLookup();
+                Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
+                lookupRs.removeLookupListener(variablesSelectListener);
+            }
+
+        });
     }
 
 }
