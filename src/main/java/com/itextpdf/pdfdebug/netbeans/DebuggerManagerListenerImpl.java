@@ -124,7 +124,7 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
                         }
                     });
                 }
-            } else {
+            } else if (JPDADebugger.PROP_CURRENT_CALL_STACK_FRAME.equals(propName)) {
                 RUPSController.hideRups();
             }
         }
