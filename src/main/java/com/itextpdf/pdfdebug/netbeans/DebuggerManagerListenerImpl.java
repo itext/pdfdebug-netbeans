@@ -66,6 +66,7 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
     private static final String COMPONENT_NAME = "RUPSTopComponent";
     private static final String VARIABLES_TAB_NAME = "localsView";
     private boolean preventUpdate = false;
+    private Lookup variablesTabLookup;
 
     /**
      * Listen to whether one of the variable lists is clicked
@@ -89,10 +90,6 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
         }
     };
-
-    // There is difference between Netbeans for Windows and Netbeans for Mac for calling order `sessionAdded` and `initWatches`.
-    private Boolean isFirstCalledSessionAdded = false;
-    private Boolean isFirstCalledInitWatches = false;
 
     private final PropertyChangeListener debuggerListener = new PropertyChangeListener() {
         @Override
@@ -147,19 +144,12 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
     @Override
     public void sessionAdded(Session sn) {
-        if (isFirstCalledInitWatches) {
-            registerVariablesTabListener();
-        } else {
-            isFirstCalledSessionAdded = true;
-        }
-
+        registerVariablesTabListener();
     }
 
     @Override
     public void sessionRemoved(Session sn) {
-        if (!isFirstCalledSessionAdded) {
-            removeVariablesTabListener();
-        }
+        removeVariablesTabListener();
     }
 
     @Override
@@ -177,12 +167,6 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
     @Override
     public void initWatches() {
-        if (isFirstCalledSessionAdded) {
-            registerVariablesTabListener();
-        } else {
-            isFirstCalledInitWatches = true;
-        }
-
     }
 
     @Override
@@ -191,9 +175,6 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
 
     @Override
     public void watchRemoved(Watch watch) {
-        if (!isFirstCalledInitWatches) {
-            removeVariablesTabListener();
-        }
     }
 
     @Override
@@ -205,9 +186,9 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
             @Override
             public void run() {
                 TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
-                Lookup lookup = locals.getLookup();
-                Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
-                lookupRs.addLookupListener(variablesSelectListener);
+                variablesTabLookup = locals.getLookup();
+                Lookup.Result lookupRs = variablesTabLookup.lookupResult(ObjectVariable.class);
+                lookupRs.addLookupListener(variablesSelectListener);   
             }
         });
     }
@@ -221,10 +202,7 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
                     rupsComponent.close();
                     rupsComponent.disposePdfWindow();
                 }
-
-                TopComponent locals = WindowManager.getDefault().findTopComponent("localsView");
-                Lookup lookup = locals.getLookup();
-                Lookup.Result lookupRs = lookup.lookupResult(ObjectVariable.class);
+                Lookup.Result lookupRs = variablesTabLookup.lookupResult(ObjectVariable.class);
                 lookupRs.removeLookupListener(variablesSelectListener);
             }
 
