@@ -49,9 +49,8 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
-import org.netbeans.api.debugger.DebuggerManagerListener;
+import org.netbeans.api.debugger.DebuggerManagerAdapter;
 import org.netbeans.api.debugger.Session;
-import org.netbeans.api.debugger.Watch;
 import org.netbeans.api.debugger.jpda.JPDADebugger;
 import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.openide.nodes.Node;
@@ -61,7 +60,7 @@ import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
-class DebuggerManagerListenerImpl implements DebuggerManagerListener {
+class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
 
     private static final String COMPONENT_NAME = "RUPSTopComponent";
     private static final String VARIABLES_TAB_NAME = "localsView";
@@ -150,35 +149,6 @@ class DebuggerManagerListenerImpl implements DebuggerManagerListener {
     @Override
     public void sessionRemoved(Session sn) {
         removeVariablesTabListener();
-    }
-
-    @Override
-    public Breakpoint[] initBreakpoints() {
-        return null;
-    }
-
-    @Override
-    public void breakpointAdded(Breakpoint brkpnt) {
-    }
-
-    @Override
-    public void breakpointRemoved(Breakpoint brkpnt) {
-    }
-
-    @Override
-    public void initWatches() {
-    }
-
-    @Override
-    public void watchAdded(Watch watch) {
-    }
-
-    @Override
-    public void watchRemoved(Watch watch) {
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
     }
 
     private void registerVariablesTabListener() {
