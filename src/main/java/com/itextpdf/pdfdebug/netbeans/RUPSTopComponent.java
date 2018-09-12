@@ -49,7 +49,6 @@ import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.event.RupsEvent;
 
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.SwingHelper;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
@@ -158,13 +157,9 @@ public final class RUPSTopComponent extends TopComponent {
     // End of variables declaration//GEN-END:variables
 
     public void initRups() {
-        SwingHelper.invoke(new Runnable() {
-            public void run() {
-                jPanel1.setLayout(new BorderLayout());
-                final Dimension dim = new Dimension(400, 400);
-                rups = Rups.startNewPlugin(jPanel1, dim, null);
-            }
-        });
+        jPanel1.setLayout(new BorderLayout());
+        final Dimension dim = new Dimension(400, 400);
+        rups = Rups.startNewPlugin(jPanel1, dim, null);
     }
 
     public void loadAndHighlightRups() {
