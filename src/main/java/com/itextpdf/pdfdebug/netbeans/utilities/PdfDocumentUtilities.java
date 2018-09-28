@@ -42,6 +42,7 @@
  */
 package com.itextpdf.pdfdebug.netbeans.utilities;
 
+import com.itextpdf.kernel.PdfException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -103,7 +104,13 @@ public class PdfDocumentUtilities {
         PdfWriter writer = doc.getWriter();
         writer.setCloseStream(true);
         doc.setCloseWriter(false);
-        doc.close();
+        try {
+            doc.close();
+        } catch (PdfException e) {
+            LoggerHelper.error("PdfDocument is empty or has something cloasing error", e, PdfDocumentUtilities.class);
+            return null;
+        }
+
         byte[] documentCopyBytes = null;
         try {
             documentCopyBytes = (byte[]) getDebugBytesMethod.invoke(writer);
