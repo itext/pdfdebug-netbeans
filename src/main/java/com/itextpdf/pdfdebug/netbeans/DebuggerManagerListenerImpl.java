@@ -51,7 +51,6 @@ import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManagerAdapter;
-import org.netbeans.api.debugger.Session;
 import org.netbeans.api.debugger.jpda.JPDADebugger;
 import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.openide.nodes.Node;
@@ -66,7 +65,8 @@ class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
     private static final String COMPONENT_NAME = "RUPSTopComponent";
     private static final String VARIABLES_TAB_NAME = "localsView";
     private boolean preventUpdate = false;
-    private Lookup variablesTabLookup;
+    private Lookup variablesTabLookup = null;
+    private Lookup.Result variablesTabLookupRs = null;
 
     /**
      * Listen to whether one of the variable lists is clicked
@@ -103,6 +103,9 @@ class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
                         @Override
                         public void run() {
                             logger.log(Level.INFO, "Debugger is breaked");
+                            removeVariablesTabListener();
+                            registerVariablesTabListener();
+
                             TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
                             Node[] activatedNodes = locals.getActivatedNodes();
                             if (activatedNodes != null && activatedNodes.length == 1) {
@@ -144,44 +147,26 @@ class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
 
     }
 
-    @Override
-    public void sessionAdded(Session sn) {
-        registerVariablesTabListener();
-    }
-
-    @Override
-    public void sessionRemoved(Session sn) {
-        removeVariablesTabListener();
-    }
-
     private void registerVariablesTabListener() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                logger.log(Level.INFO, "Add listener to Variables tab");
-                TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
-                variablesTabLookup = locals.getLookup();
-                Lookup.Result lookupRs = variablesTabLookup.lookupResult(ObjectVariable.class);
-                lookupRs.addLookupListener(variablesSelectListener);   
-            }
-        });
+        logger.log(Level.INFO, "Add listener to Variables tab");
+        TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
+        variablesTabLookup = locals.getLookup();
+        variablesTabLookupRs = variablesTabLookup.lookupResult(ObjectVariable.class);
+        variablesTabLookupRs.allInstances();
+        variablesTabLookupRs.addLookupListener(variablesSelectListener);
     }
 
     private void removeVariablesTabListener() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                logger.log(Level.INFO, "Remove listener from Variables tab");
-                RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
-                if (rupsComponent != null) {
-                    rupsComponent.close();
-                    rupsComponent.disposePdfWindow();
-                }
-                Lookup.Result lookupRs = variablesTabLookup.lookupResult(ObjectVariable.class);
-                lookupRs.removeLookupListener(variablesSelectListener);
+        logger.log(Level.INFO, "Remove listener from Variables tab");
+        if (variablesTabLookupRs != null) {
+            RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
+            if (rupsComponent != null) {
+                rupsComponent.close();
+                rupsComponent.disposePdfWindow();
             }
+            variablesTabLookupRs.removeLookupListener(variablesSelectListener);
+        }
 
-        });
     }
 
 }
