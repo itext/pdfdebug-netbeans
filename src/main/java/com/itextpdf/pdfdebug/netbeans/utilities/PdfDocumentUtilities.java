@@ -107,7 +107,7 @@ public class PdfDocumentUtilities {
         try {
             doc.close();
         } catch (PdfException e) {
-            LoggerHelper.error("PdfDocument is empty or has something cloasing error", e, PdfDocumentUtilities.class);
+            LoggerHelper.error("PdfDocument is empty or has something closing error", e, PdfDocumentUtilities.class);
             return null;
         }
 
