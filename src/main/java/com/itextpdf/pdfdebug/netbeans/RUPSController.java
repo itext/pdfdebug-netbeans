@@ -45,6 +45,8 @@ package com.itextpdf.pdfdebug.netbeans;
 import com.itextpdf.pdfdebug.netbeans.utilities.DebugUtilities;
 import com.itextpdf.pdfdebug.netbeans.utilities.PdfDocumentUtilities;
 import com.itextpdf.rups.model.LoggerHelper;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.debugger.jpda.ObjectVariable;
 import org.openide.windows.Mode;
@@ -56,11 +58,12 @@ import org.openide.windows.WindowManager;
  * @author boram
  */
 class RUPSController {
-
+    private static final Logger logger = Logger.getLogger(RUPSController.class.getName());
     private static final String COMPONENT_NAME = "RUPSTopComponent";
     private static final String MODE_NAVIGATOR = "navigator";
 
     public static void showRups(final ObjectVariable finalPdfObj) {
+        logger.log(Level.INFO, "Request to show rups.");
         try {
 
             Runnable openComponent = new Runnable() {
@@ -95,6 +98,7 @@ class RUPSController {
     }
 
     public static void hideRups() {
+        logger.log(Level.INFO, "Request to hide rups.");
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
