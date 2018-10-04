@@ -46,12 +46,16 @@ import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.rups.Rups;
+import com.itextpdf.rups.event.RupsEvent;
+
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.SwingHelper;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.windows.TopComponent;
@@ -66,7 +70,7 @@ import org.openide.util.NbBundle.Messages;
 )
 @TopComponent.Description(
         preferredID = "RUPSTopComponent",
-        iconBase="com/itextpdf/pdfdebug/netbeans/pdfdebug.png", 
+        iconBase = "com/itextpdf/pdfdebug/netbeans/pdfdebug.png",
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "navigator", openAtStartup = false)
@@ -87,6 +91,25 @@ public final class RUPSTopComponent extends TopComponent {
     private volatile PdfDocument prevDoc = null;
     public byte[] documentRawBytes = null;
     private String variableName = "";
+    private final Observer observeRupsEvent = new Observer() {
+        @Override
+        public void update(Observable o, final Object arg) {
+            if (arg instanceof RupsEvent) {
+                RupsEvent event = (RupsEvent) arg;
+                if (event.getType() == RupsEvent.OPEN_DOCUMENT_POST_EVENT) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            rups.highlightLastSavedChanges();
+                            rups.unregisterEventObserver(observeRupsEvent);
+                        }
+
+                    });
+                    
+                }
+            }
+        }
+    };
 
     public RUPSTopComponent() {
         initComponents();
@@ -134,13 +157,9 @@ public final class RUPSTopComponent extends TopComponent {
     // End of variables declaration//GEN-END:variables
 
     public void initRups() {
-        SwingHelper.invoke(new Runnable() {
-            public void run() {
-                jPanel1.setLayout(new BorderLayout());
-                final Dimension dim = new Dimension(400, 400);
-                rups = Rups.startNewPlugin(jPanel1, dim, null);
-            }
-        });
+        jPanel1.setLayout(new BorderLayout());
+        final Dimension dim = new Dimension(400, 400);
+        rups = Rups.startNewPlugin(jPanel1, dim, null);
     }
 
     public void loadAndHighlightRups() {
@@ -155,11 +174,14 @@ public final class RUPSTopComponent extends TopComponent {
                     isEqual = rups.compareWithDocument(tempDoc, true);
                 }
                 if (!isEqual) {
+                    if (prevDoc != null) {
+                        rups.registerEventObserver(observeRupsEvent);
+                    }
                     rups.loadDocumentFromRawContent(documentRawBytes, variableName, null, true);
-                }
-                if (prevDoc != null) {
+                } else if (prevDoc != null) {
                     rups.highlightLastSavedChanges();
                 }
+
                 prevDoc = tempDoc;
             }
         } catch (final IOException | PdfException | com.itextpdf.io.IOException e) {

@@ -56,7 +56,6 @@ import org.openide.windows.WindowManager;
  * @author boram
  */
 class RUPSController {
-
     private static final String COMPONENT_NAME = "RUPSTopComponent";
     private static final String MODE_NAVIGATOR = "navigator";
 
