@@ -46,8 +46,6 @@ import com.itextpdf.pdfdebug.netbeans.utilities.PdfDocumentUtilities;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManagerAdapter;
@@ -61,7 +59,6 @@ import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
-    private static final Logger logger = Logger.getLogger(DebuggerManagerListenerImpl.class.getName());
     private static final String COMPONENT_NAME = "RUPSTopComponent";
     private static final String VARIABLES_TAB_NAME = "localsView";
     private boolean preventUpdate = false;
@@ -74,7 +71,6 @@ class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
     private final LookupListener variablesSelectListener = new LookupListener() {
         @Override
         public void resultChanged(LookupEvent le) {
-            logger.log(Level.INFO, "Variables tab listener is triggered.");
             Lookup.Result res = (Lookup.Result) le.getSource();
             List<? extends ObjectVariable> list = (List) res.allInstances();
             if (list.size() == 1) {
@@ -102,7 +98,6 @@ class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            logger.log(Level.INFO, "Debugger is breaked");
                             removeVariablesTabListener();
                             registerVariablesTabListener();
 
@@ -134,21 +129,18 @@ class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
 
     @Override
     public void engineAdded(DebuggerEngine de) {
-        logger.log(Level.INFO, "Add debugger property change listener.");
         JPDADebugger dbg = de.lookupFirst(null, JPDADebugger.class);
         dbg.addPropertyChangeListener(debuggerListener);
     }
 
     @Override
     public void engineRemoved(DebuggerEngine de) {
-        logger.log(Level.INFO, "Remove debugger property change listener.");
         JPDADebugger dbg = de.lookupFirst(null, JPDADebugger.class);
         dbg.removePropertyChangeListener(debuggerListener);
 
     }
 
     private void registerVariablesTabListener() {
-        logger.log(Level.INFO, "Add listener to Variables tab");
         TopComponent locals = WindowManager.getDefault().findTopComponent(VARIABLES_TAB_NAME);
         variablesTabLookup = locals.getLookup();
         variablesTabLookupRs = variablesTabLookup.lookupResult(ObjectVariable.class);
@@ -157,7 +149,6 @@ class DebuggerManagerListenerImpl extends DebuggerManagerAdapter {
     }
 
     private void removeVariablesTabListener() {
-        logger.log(Level.INFO, "Remove listener from Variables tab");
         if (variablesTabLookupRs != null) {
             RUPSTopComponent rupsComponent = (RUPSTopComponent) WindowManager.getDefault().findTopComponent(COMPONENT_NAME);
             if (rupsComponent != null) {
