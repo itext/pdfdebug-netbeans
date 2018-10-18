@@ -51,7 +51,7 @@ public class DebugUtilities {
     /**
      * Get the name of the variable based on a selection
      *
-     * @param selection the selected text
+     * @param obj the selected text
      * @return the name of the variable
      */
     public static String getVariableName(ObjectVariable obj) {
