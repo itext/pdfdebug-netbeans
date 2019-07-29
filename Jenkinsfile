@@ -2,6 +2,8 @@
 @Library('pipeline-library')_
 
 def schedule = env.BRANCH_NAME.contains('master') ? '@monthly' : env.BRANCH_NAME == 'develop' ? '@midnight' : ''
+def sonarBranchName = env.BRANCH_NAME.contains('master') ? '-Dsonar.branch.name=master' : '-Dsonar.branch.name=' + env.BRANCH_NAME
+def sonarBranchTarget = env.BRANCH_NAME.contains('master') ? '' : env.BRANCH_NAME == 'develop' ? '-Dsonar.branch.target=master' : '-Dsonar.branch.target=develop'
 
 pipeline {
 
@@ -36,7 +38,7 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES')
             }
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: '.repository') {
                     sh 'mvn clean'
                 }
             }
@@ -46,7 +48,7 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES')
             }
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: '.repository') {
                     sh 'mvn compile test-compile package -Dmaven.test.skip=true -Dmaven.javadoc.failOnError=false'
                 }
             }
@@ -55,14 +57,10 @@ pipeline {
             options {
                 timeout(time: 30, unit: 'MINUTES')
             }
-            environment {
-                SONAR_BRANCH_NAME = sh(returnStdout: true, script: '[ $BRANCH_NAME = master ] && echo || [ $BRANCH_NAME = develop ] && echo -Dsonar.branch.name=develop || echo -Dsonar.branch.name=$BRANCH_NAME').trim()
-                SONAR_BRANCH_TARGET = sh(returnStdout: true, script: '[ $BRANCH_NAME = master ] && echo || [ $BRANCH_NAME = develop ] && echo -Dsonar.branch.target=master || echo -Dsonar.branch.target=develop').trim()
-            }
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: '.repository') {
                     withSonarQubeEnv('Sonar') {
-                        sh 'mvn -DgsExec="${gsExec}" -DcompareExec="${compareExec}" -Dmaven.test.skip=false -Dmaven.test.failure.ignore=false -Dmaven.javadoc.skip=true org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report sonar:sonar "${SONAR_BRANCH_NAME}" "${SONAR_BRANCH_TARGET}"'
+                        sh 'mvn -DgsExec="${gsExec}" -DcompareExec="${compareExec}" -Dmaven.test.skip=false -Dmaven.test.failure.ignore=false -Dmaven.javadoc.skip=true org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report sonar:sonar ' + sonarBranchName + ' ' + sonarBranchTarget
                     }
                 }
             }
@@ -72,7 +70,7 @@ pipeline {
                 timeout(time: 30, unit: 'MINUTES')
             }
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: '.repository') {
                     sh 'mvn verify -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dpmd.analysisCache=true'
                 }
             }
@@ -133,14 +131,14 @@ pipeline {
         }
         fixed {
             script {
-                if ((env.BRANCH_NAME == 'master') || (env.BRANCH_NAME == 'develop')) {
+                if (env.BRANCH_NAME.contains('master') || env.BRANCH_NAME.contains('develop')) {
                     slackNotifier("#ci", currentBuild.currentResult, "${env.BRANCH_NAME} - Back to normal")
                 }
             }
         }
         regression {
             script {
-                if ((env.BRANCH_NAME == 'master') || (env.BRANCH_NAME == 'develop')) {
+                if (env.BRANCH_NAME.contains('master') || env.BRANCH_NAME.contains('develop')) {
                     slackNotifier("#ci", currentBuild.currentResult, "${env.BRANCH_NAME} - First failure")
                 }
             }
